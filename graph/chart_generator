@@ -1,0 +1,62 @@
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import numpy as np
+
+def plot_allocation_comparison(tickers, user_weights, optimal_weights):
+    """
+    Generates side-by-side Donut charts.
+    """
+    fig = make_subplots(rows=1, cols=2, specs=[[{'type':'domain'}, {'type':'domain'}]],
+                        subplot_titles=['Your Portfolio', 'AI Optimized'])
+
+    fig.add_trace(go.Pie(labels=tickers, values=user_weights, name="User", hole=.4), 1, 1)
+    fig.add_trace(go.Pie(labels=tickers, values=optimal_weights, name="Optimal", hole=.4), 1, 2)
+
+    fig.update_layout(title_text="Asset Allocation Comparison", showlegend=True)
+    return fig
+
+def plot_efficient_frontier(sim_data, user_metrics, opt_metrics):
+    """
+    Generates the Efficient Frontier scatter plot with User vs Optimal markers.
+    """
+    # Downsample for speed (plot 2000 points instead of 30k)
+    idx = np.random.choice(len(sim_data['returns']), 2000, replace=False)
+    
+    fig = go.Figure()
+
+    # 1. The Cloud (All Possibilities)
+    fig.add_trace(go.Scatter(
+        x=np.array(sim_data['volatility'])[idx],
+        y=np.array(sim_data['returns'])[idx],
+        mode='markers',
+        marker=dict(color='lightgrey', size=3, opacity=0.5),
+        name='Simulations'
+    ))
+
+    # 2. User Point (Red)
+    fig.add_trace(go.Scatter(
+        x=[user_metrics['volatility']],
+        y=[user_metrics['return']],
+        mode='markers+text',
+        marker=dict(color='red', size=15, symbol='x'),
+        text=['YOU'], textposition="top center",
+        name='Your Portfolio'
+    ))
+
+    # 3. Optimal Point (Green)
+    fig.add_trace(go.Scatter(
+        x=[opt_metrics['volatility']],
+        y=[opt_metrics['return']],
+        mode='markers+text',
+        marker=dict(color='green', size=15, symbol='star'),
+        text=['OPTIMAL'], textposition="top center",
+        name='AI Optimized'
+    ))
+
+    fig.update_layout(
+        title="Risk vs. Return (Efficiency Frontier)",
+        xaxis_title="Annual Risk (Volatility)",
+        yaxis_title="Expected Annual Return",
+        showlegend=True
+    )
+    return fig

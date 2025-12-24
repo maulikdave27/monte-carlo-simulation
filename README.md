@@ -23,8 +23,7 @@ A professional-grade, Monte Carlo–based portfolio optimization application bui
 
 ### 1. Clone the Repository
 ```bash
-git clone <repository-url>
-cd Code
+git clone maulikdave27/monte-carlo-simulation
 ```
 
 ### 2. Create a Virtual Environment (Optional but Recommended)
