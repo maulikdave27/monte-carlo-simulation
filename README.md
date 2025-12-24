@@ -1,8 +1,8 @@
-# Portfolio Risk Optimization Engine 📊
+# Portfolio Risk Optimization Engine 
 
 A professional-grade, Monte Carlo–based portfolio optimization application built with **Streamlit**. This tool allows users to analyze their current portfolio and find the optimal asset allocation based on their risk appetite and investment horizon using historical data.
 
-## 🚀 Features
+##  Features
 
 -   **Dynamic Monte Carlo Simulation:** Run up to 1,000,000 simulations to map the Efficient Frontier. Controls provided via sidebar slider.
 -   **Portfolio Auditing:** Upload your existing portfolio (CSV/Excel) and compare its performance metrics against AI-optimized strategies.
@@ -13,14 +13,14 @@ A professional-grade, Monte Carlo–based portfolio optimization application bui
     -   **Allocation Comparison:** Side-by-side Asset Weight Distribution (Donut Charts).
 -   **Flexible Input:** Support for file uploads or manual asset selection for testing.
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 -   **Frontend:** [Streamlit](https://streamlit.io/)
 -   **Data Processing:** [Pandas](https://pandas.pydata.org/), [NumPy](https://numpy.org/)
 -   **Visualization:** [Plotly](https://plotly.com/python/)
 -   **Backend Logic:** Custom modular engine for financial metrics and stochastic simulations.
 
-## 📥 Setup Instructions
+##  Setup Instructions
 
 ### 1. Clone the Repository
 ```bash
