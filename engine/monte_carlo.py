@@ -1,5 +1,5 @@
 import numpy as np
-
+# Monte Carlo Simulation Function
 def run_monte_carlo(expected_returns, cov_matrix, num_portfolios, risk_free_rate):
     num_assets = len(expected_returns)
 
