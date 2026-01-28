@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pandas
+numpy
+numba
+google-genai
+python-dotenv
+openpyxl
+python-multipart
+plotly
