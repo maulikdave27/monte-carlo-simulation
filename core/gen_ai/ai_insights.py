@@ -18,7 +18,7 @@ def get_genai_client():
     except Exception as e:
         return None, f"⚠️ Error configuring Gemini Client: {str(e)}"
 
-def get_simulation_insights(user_metrics, optimal_metrics, simulation_data, tickers):
+def generate_full_report(user_metrics, optimal_metrics, simulation_data, tickers):
     """
     Generates text insights using Gemini based on portfolio simulation data.
     
@@ -61,64 +61,121 @@ def get_simulation_insights(user_metrics, optimal_metrics, simulation_data, tick
     
     # 3. Construct the Prompt
     prompt = f"""
-    You are an expert financial analyst acting as an AI Portfolio Consultant.
+    You are an elite institutional Portfolio Strategist at a top-tier asset management firm.
     
     **Context:**
-    We ran a Monte Carlo simulation with {stats['count']:,} iterations to find the optimal portfolio for a fixed set of assets.
+    We ran a Monte Carlo simulation with {stats['count']:,} iterations to find the optimal risk-adjusted portfolio.
     
     **Asset Universe:**
     {', '.join(tickers)}
-    (Please infer the sector/industry exposures based on these tickers).
     
-    **Market/Simulation Context (The "Possibility Space"):**
+    **Market/Simulation Context:**
     - Returns Range: {stats['return_min']:.2%} to {stats['return_max']:.2%} (Median: {stats['return_median']:.2%})
     - Volatility Range: {stats['vol_min']:.2%} to {stats['vol_max']:.2%}
-    - Max Possible Sharpe Ratio: {stats['sharpe_max']:.2f} (Average: {stats['sharpe_mean']:.2f})
+    - Max Sharpe Ratio Achieved: {stats['sharpe_max']:.2f} (Average: {stats['sharpe_mean']:.2f})
     
-    **User's Portfolio Performance:**
-    - Return: {user_metrics['return']:.2%} (Better than {user_ret_pct:.1f}% of random portfolios)
+    **User's Current Portfolio:**
+    - Expected Return: {user_metrics['return']:.2%} (Ranks in top {100-user_ret_pct:.1f}% of simulations)
     - Volatility: {user_metrics['volatility']:.2%}
-    - Sharpe Ratio: {user_metrics['sharpe']:.2f} (Better than {user_sharpe_pct:.1f}% of random portfolios)
+    - Sharpe Ratio: {user_metrics['sharpe']:.2f} (Ranks in top {100-user_sharpe_pct:.1f}% of simulations)
     - Sortino Ratio: {user_metrics['sortino']:.2f}
-    - CVaR (95%): {user_metrics['cvar']:.2%} (Theoretical worst 5% loss)
-    - Diversification Score: {user_metrics['diversification_score']:.0%} (Higher is better)
-    - Allocations: {dict(zip(tickers, [round(w, 3) for w in user_metrics['weights']]))}
+    - CVaR (95%): {user_metrics['cvar']:.2%}
+    - Diversification Score: {user_metrics['diversification_score']:.0%}
+    - Current Weights: {dict(zip(tickers, [round(w, 3) for w in user_metrics['weights']]))}
     
     **AI Optimized Portfolio:**
-    - Return: {optimal_metrics['return']:.2%}
+    - Expected Return: {optimal_metrics['return']:.2%}
     - Volatility: {optimal_metrics['volatility']:.2%}
     - Sharpe Ratio: {optimal_metrics['sharpe']:.2f}
     - Sortino Ratio: {optimal_metrics['sortino']:.2f}
     - CVaR (95%): {optimal_metrics['cvar']:.2%}
     - Diversification Score: {optimal_metrics['diversification_score']:.0%}
-    - Allocations: {dict(zip(tickers, [round(w, 3) for w in optimal_metrics['weights']]))}
+    - Optimal Weights: {dict(zip(tickers, [round(w, 3) for w in optimal_metrics['weights']]))}
+    
+    **Key Performance Improvements:**
+    - Return Delta: {(optimal_metrics['return'] - user_metrics['return']):.2%}
+    - Volatility Reduction: {(user_metrics['volatility'] - optimal_metrics['volatility']):.2%}
+    - Sharpe Improvement: {(optimal_metrics['sharpe'] - user_metrics['sharpe']):.2f}
+    - CVaR Improvement: {(user_metrics['cvar'] - optimal_metrics['cvar']):.2%}
     
     **Task:**
-    Provide a professional, high-net-worth style analysis. The output MUST be in beautiful MARKDOWN format and follow this EXACT structure:
-
-    ### SECTOR SUMMARY
-    [A punchy 3-4 sentence summary of the portfolio's current sector-based exposure and the strategic shift recommended by the AI. Focus on sector concentrations and diversification.]
-
-    ---SPLIT---
-
-    ### DETAILED INSIGHTS
-    #### Performance Analysis
-    [Deep dive comparing User vs Optimal metrics. Discuss Risk vs Efficiency.]
-
-    #### Detailed Sector Breakdown & Asset Strategy
-    [A granular look at each sector involved. Explain why the AI moved weights between specific tickers/sectors. Use table or bullet points if appropriate.]
-
-    #### Strategic Recommendation
-    [Final professional verdict.]
-
-    No "robot talk", no preamble, just the markdown report starting with ### SECTOR SUMMARY.
+    Generate a COMPREHENSIVE, PROFESSIONALLY-STYLED investment report in beautiful Markdown format.
+    This report will be converted to PDF for institutional clients.
+    
+    **Required Structure (Follow EXACTLY):**
+    
+    ## 📊 Executive Summary
+    A compelling 4-5 sentence overview of the portfolio analysis findings. Highlight the key improvement opportunity and the strategic recommendation. Use authoritative language.
+    
+    ---
+    
+    ## 📈 Performance Analysis
+    
+    ### Current vs Optimal Comparison
+    Create a detailed comparison table and narrative analysis of:
+    - Risk-adjusted returns (Sharpe, Sortino)
+    - Tail risk exposure (CVaR)
+    - Diversification benefits
+    - Volatility profile
+    
+    ### Simulation Context
+    Explain where the portfolio ranks among {stats['count']:,} simulated portfolios.
+    Discuss the statistical significance of the optimization.
+    
+    ---
+    
+    ## 🏢 Sector & Asset Strategy
+    
+    ### Sector Rotation Analysis
+    Analyze the sector exposure shifts between current and optimal allocations.
+    Explain the macroeconomic rationale for each major shift.
+    
+    ### Asset-Level Recommendations
+    For each significant weight change, provide:
+    - Current weight vs recommended weight
+    - Rationale for the change
+    - Expected impact on portfolio
+    
+    ---
+    
+    ## ⚠️ Risk Assessment
+    
+    ### Downside Protection
+    Discuss CVaR improvements and what they mean in practical terms.
+    Estimate potential dollar impact on a $1M portfolio in worst-case scenarios.
+    
+    ### Volatility Analysis
+    Compare current vs optimal volatility profiles.
+    Discuss trade-offs between return and stability.
+    
+    ---
+    
+    ## 🎯 Strategic Recommendations
+    
+    Provide 3-5 specific, actionable recommendations for the investor.
+    Use bullet points with bold action items.
+    Be direct and prescriptive - this is for sophisticated institutional clients.
+    
+    ---
+    
+    ## 📋 Conclusion
+    A strong 2-3 sentence closing that reinforces the key message.
+    
+    **Formatting Guidelines:**
+    - Use proper Markdown headers (##, ###)
+    - Include horizontal rules (---) between major sections
+    - Use **bold** for emphasis on key metrics
+    - Use bullet points for lists
+    - Professional, authoritative tone throughout
+    - No "I think" or "We suggest" - use "The analysis indicates", "The portfolio requires"
+    - Minimum 800 words total
     """
     
     # 4. Call Model
     try:
         # Use the google-genai SDK syntax
         response = client.models.generate_content(
-            model='gemini-2.5-flash-lite', 
+            model='gemini-2.5-flash', 
             contents=prompt
         )
         

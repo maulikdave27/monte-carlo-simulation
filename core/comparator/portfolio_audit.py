@@ -132,5 +132,6 @@ def run_audit(user_df, historical_data, risk_preference="High", risk_free_rate=0
         "optimal": opt_stats,
         "tickers": valid_tickers,
         "num_simulations": len(results['returns']),
-        "simulation_data": results 
+        "simulation_data": results,
+        "cov_matrix": cov_mat  # Add covariance matrix for volatility contribution
     }, None

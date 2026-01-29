@@ -62,3 +62,15 @@ def get_sector_weights(tickers, weights):
     sorted_weights = dict(sorted(sector_weights.items(), key=lambda item: item[1], reverse=True))
     
     return sorted_weights
+
+def get_ticker_sector(ticker):
+    """
+    Returns the sector for a given ticker.
+    
+    Args:
+        ticker (str): Ticker symbol
+        
+    Returns:
+        str: Sector name (defaults to 'Other' if not found)
+    """
+    return ASSET_SECTOR_MAP.get(ticker, "Other")

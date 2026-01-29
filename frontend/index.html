@@ -1,139 +1,689 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Risk Intelligence</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <!-- Load Plotly.js -->
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <!-- Load Marked for Markdown -->
+    <title>Portfolio Risk Aversion</title>
+
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- ICONS -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <!-- TAILWIND -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        charcoal: '#121417',
+                        gunmetal: '#1A1D23',
+                        slate: '#2A2E35',
+                        primary: '#3A86FF',
+                        accent: '#06D6A0',
+                        muted: '#8E9AAF'
+                    },
+                    fontFamily: {
+                        sans: ['Manrope', 'sans-serif'],
+                        mono: ['Roboto Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- MARKED -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- CUSTOM STYLES -->
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 
-<body>
+<body class="bg-charcoal text-muted overflow-hidden flex h-screen">
 
-    <header>
-        <h1>Portfolio Risk Intelligence</h1>
-        <p class="subtitle">Institutional Grade Risk Assessment & AI Optimization</p>
-    </header>
+    <!-- SIDEBAR (INPUT RAIL) -->
+    <aside id="sidebar"
+        class="w-[320px] bg-gunmetal border-r border-slate flex flex-col shrink-0 z-20 shadow-xl transition-all duration-300">
+        <div class="p-6 border-b border-slate flex items-center justify-between">
+            <div class="flex items-center gap-3 overflow-hidden whitespace-nowrap">
+                <div
+                    class="size-8 rounded bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20 shrink-0">
+                    <span class="material-symbols-outlined text-[20px]">security</span>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-xs tracking-wide">Portfolio Risk Aversion</h1>
+                </div>
+            </div>
+            <button id="toggle-sidebar" class="text-slate-500 hover:text-white transition-colors">
+                <span class="material-symbols-outlined">menu_open</span>
+            </button>
+        </div>
 
-    <main class="container">
-        <!-- Settings Panel -->
-        <section class="settings-panel">
-            <h2>Simulation Settings</h2>
-            <form id="auditForm">
-                <div class="form-group">
-                    <label for="timeHorizon">Investment Horizon</label>
-                    <select id="timeHorizon" name="timeHorizon">
-                        <option value="1-3 years">1-3 years (Short Term)</option>
-                        <option value="3-6 years" selected>3-6 years (Medium Term)</option>
-                        <option value="6+ years">6+ years (Long Term)</option>
-                    </select>
+        <div class="flex-1 overflow-y-auto p-6 space-y-8 overflow-hidden whitespace-nowrap">
+            <!-- DATA SOURCE -->
+            <div class="space-y-3">
+                <label class="text-[10px] font-bold uppercase tracking-widest text-muted">Data Source</label>
+
+                <!-- UPLOAD ZONE -->
+                <div id="upload-zone"
+                    class="border border-dashed border-slate rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-white/5 transition-all text-center group relative">
+                    <input type="file" id="portfolio-upload" class="absolute inset-0 opacity-0 cursor-pointer"
+                        accept=".csv, .xlsx">
+                    <span
+                        class="material-symbols-outlined text-slate-500 group-hover:text-primary text-3xl mb-2 transition-colors">cloud_upload</span>
+                    <p class="text-xs text-white font-medium group-hover:text-primary transition-colors">Upload
+                        Portfolio</p>
+                    <p class="text-[10px] text-slate-500 mt-1">CSV or Excel</p>
                 </div>
 
-                <div class="form-group">
-                    <label for="riskPreference">Risk Preference</label>
-                    <select id="riskPreference" name="riskPreference">
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High" selected>High</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="numSimulations">Number of Simulations</label>
-                    <div class="slider-container">
-                        <input type="range" id="numSimulations" name="numSimulations" min="1000000" max="4000000"
-                            step="100000" value="1000000">
-                        <span id="simValue">1,000,000</span>
+                <!-- PORTFOLIO PREVIEW (HIDDEN INITIALLY) -->
+                <div id="portfolio-preview" class="hidden bg-charcoal rounded border border-slate p-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[10px] font-bold uppercase text-primary">Loaded Assets</span>
+                        <span id="asset-count"
+                            class="text-[10px] font-mono text-white bg-slate-800 px-1.5 rounded">0</span>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Input Method</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="inputMethod" value="manual" checked> Manual Test</label>
-                        <label><input type="radio" name="inputMethod" value="upload"> File Upload</label>
+                    <div id="ticker-list" class="flex flex-wrap gap-1">
+                        <!-- Tickers injected here -->
                     </div>
-                </div>
-
-                <!-- Manual Input Area -->
-                <div id="manualInputSection" class="input-section">
-                    <p>Testing with default Tech/Finance biased portfolio (AAPL, JPM, XOM, NVDA, MSFT, GOOGL, AMZN).</p>
-                </div>
-
-                <!-- File Upload Area -->
-                <div id="fileUploadSection" class="input-section hidden">
-                    <input type="file" id="portfolioFile" accept=".csv, .xlsx">
-                </div>
-
-                <button type="submit" id="runBtn" class="primary-btn">Run Risk Analysis</button>
-            </form>
-        </section>
-
-        <!-- Results Dashboard -->
-        <section id="resultsDashboard" class="hidden">
-            <hr>
-
-            <!-- Metrics Grid -->
-            <div class="metrics-container">
-                <div class="metric-card user-card">
-                    <h3>Your Portfolio</h3>
-                    <div id="userMetrics" class="metric-list"></div>
-                </div>
-                <div class="metric-card optimal-card">
-                    <h3>AI Optimized</h3>
-                    <div id="optimalMetrics" class="metric-list"></div>
                 </div>
             </div>
 
-            <!-- Charts -->
-            <div class="visuals-tabs">
-                <div class="tab-buttons">
-                    <button class="tab-btn active" onclick="showTab('frontier')">Efficiency Frontier</button>
-                    <button class="tab-btn" onclick="showTab('allocation')">Asset Allocation</button>
-                    <button class="tab-btn" onclick="showTab('sector')">Sector Analysis</button>
-                </div>
+            <!-- CONTROLS -->
+            <div id="sidebar-controls" class="space-y-6">
+                <!-- TIME HORIZON -->
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-muted">Time Horizon</label>
+                    <div class="segment-group">
+                        <input type="radio" name="time_horizon" id="th-short" value="1-3 years" class="segment-input">
+                        <label for="th-short" class="segment-label">1-3Y</label>
 
-                <div id="frontierTab" class="tab-content">
-                    <div class="chart-box full">
-                        <div id="frontierChart"></div>
+                        <input type="radio" name="time_horizon" id="th-med" value="3-6 years" class="segment-input"
+                            checked>
+                        <label for="th-med" class="segment-label">3-6Y</label>
+
+                        <input type="radio" name="time_horizon" id="th-long" value="6+ years" class="segment-input">
+                        <label for="th-long" class="segment-label">6Y+</label>
                     </div>
                 </div>
 
-                <div id="allocationTab" class="tab-content hidden">
-                    <div class="charts-container">
-                        <div class="chart-box">
-                            <h4 style="text-align: center;">Your Portfolio</h4>
-                            <div id="userAllocationChart"></div>
+                <!-- RISK PREFERENCE -->
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-muted">Risk Preference</label>
+                    <div class="segment-group">
+                        <input type="radio" name="risk" id="risk-low" value="Low" class="segment-input">
+                        <label for="risk-low" class="segment-label">Low</label>
+
+                        <input type="radio" name="risk" id="risk-med" value="Medium" class="segment-input">
+                        <label for="risk-med" class="segment-label">Med</label>
+
+                        <input type="radio" name="risk" id="risk-high" value="High" class="segment-input" checked>
+                        <label for="risk-high" class="segment-label">High</label>
+                    </div>
+                </div>
+
+                <!-- MONTE CARLO SCALE -->
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-muted">Monte Carlo
+                        Iterations</label>
+                    <div class="segment-group">
+                        <input type="radio" name="sims" id="sims-1m" value="1000000" class="segment-input" checked>
+                        <label for="sims-1m" class="segment-label">1M</label>
+
+                        <input type="radio" name="sims" id="sims-25m" value="2500000" class="segment-input">
+                        <label for="sims-25m" class="segment-label">2.5M</label>
+
+                        <input type="radio" name="sims" id="sims-4m" value="4000000" class="segment-input">
+                        <label for="sims-4m" class="segment-label">4M</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 border-t border-slate bg-gunmetal">
+            <button id="run-btn"
+                class="w-full bg-primary hover:brightness-110 active:scale-[0.98] text-white font-bold py-4 rounded-lg shadow-lg shadow-primary/25 transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed">
+                <span class="material-symbols-outlined text-lg group-hover:animate-pulse">bolt</span>
+                RUN SIMULATION
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN DASHBOARD -->
+    <main class="flex-1 overflow-y-auto bg-charcoal p-10 relative custom-scroll">
+
+        <!-- HEADER -->
+        <header class="flex justify-between items-end mb-10">
+            <div>
+                <h2 class="text-2xl text-white font-bold mb-1">Portfolio Risk Aversion</h2>
+                <p class="text-sm">Conservative capital preservation engine.</p>
+            </div>
+        </header>
+
+        <!-- DASHBOARD ROWS -->
+        <div class="flex flex-col gap-10 pb-20">
+
+            <!-- ROW 1: KPI METRICS (3x2) + EFFICIENT FRONTIER -->
+            <div class="grid grid-cols-12 gap-8">
+                <!-- KPI GRID (7/12) - 3 columns x 2 rows -->
+                <div class="col-span-12 xl:col-span-7">
+                    <div class="grid grid-cols-3 gap-4">
+                        <!-- 1. EXPECTED RETURN -->
+                        <div
+                            class="bg-gunmetal border border-slate rounded-xl p-4 shadow-lg group hover:border-slate/60 transition-all relative">
+                            <div class="flex justify-between items-start mb-2 opacity-60">
+                                <div class="flex items-center gap-1 cursor-help group/tooltip">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest">Exp. Return</span>
+                                    <span class="material-symbols-outlined text-[10px] text-slate-500">help</span>
+                                </div>
+                            </div>
+                            <!-- Tooltip OUTSIDE opacity container -->
+                            <div
+                                class="absolute bottom-full left-0 mb-2 w-64 bg-black border border-slate-600 p-3 rounded-lg text-xs text-white hidden group-hover:block z-[100] shadow-2xl">
+                                <strong class="text-primary block mb-1">Expected Annual Return</strong>
+                                The weighted average of expected returns from each asset in the portfolio.
+                                Calculated using historical mean returns annualized over 252 trading days.
+                                Higher values indicate greater profit potential but may come with increased risk.
+                            </div>
+                            <div class="flex items-baseline gap-2 mb-2">
+                                <span class="text-xl font-mono text-white tracking-tight" id="val-ret-curr">-</span>
+                                <span class="text-[10px] text-slate-500 font-mono">Current</span>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-slate/30 pt-2">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] uppercase text-primary font-bold">Optimal</span>
+                                    <span class="text-sm font-mono text-white" id="val-ret-opt">-</span>
+                                </div>
+                                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded text-xs font-mono"
+                                    id="badge-ret">
+                                    <span id="val-ret-delta">-</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="chart-box">
-                            <h4 style="text-align: center;">AI Optimized</h4>
-                            <div id="optimalAllocationChart"></div>
+
+
+                        <!-- 2. VOLATILITY -->
+                        <div
+                            class="bg-gunmetal border border-slate rounded-xl p-4 shadow-lg group hover:border-slate/60 transition-all relative">
+                            <div class="flex justify-between items-start mb-2 opacity-60">
+                                <div class="flex items-center gap-1 cursor-help">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest">Volatility</span>
+                                    <span class="material-symbols-outlined text-[10px] text-slate-500">help</span>
+                                </div>
+                            </div>
+                            <!-- Tooltip OUTSIDE opacity container -->
+                            <div
+                                class="absolute bottom-full left-0 mb-2 w-64 bg-black border border-slate-600 p-3 rounded-lg text-xs text-white hidden group-hover:block z-[100] shadow-2xl">
+                                <strong class="text-primary block mb-1">Portfolio Volatility (Risk)</strong>
+                                Standard deviation of portfolio returns, annualized. Measures how much returns
+                                deviate from the average. Lower volatility means more predictable returns.
+                                Values above 20% are considered high-risk for equity portfolios.
+                            </div>
+                            <div class="flex items-baseline gap-2 mb-2">
+                                <span class="text-xl font-mono text-white tracking-tight" id="val-vol-curr">-</span>
+                                <span class="text-[10px] text-slate-500 font-mono">Current</span>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-slate/30 pt-2">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] uppercase text-primary font-bold">Optimal</span>
+                                    <span class="text-sm font-mono text-white" id="val-vol-opt">-</span>
+                                </div>
+                                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded text-xs font-mono"
+                                    id="badge-vol">
+                                    <span id="val-vol-delta">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- 3. SHARPE RATIO -->
+                        <div
+                            class="bg-gunmetal border border-slate rounded-xl p-4 shadow-lg group hover:border-slate/60 transition-all relative">
+                            <div class="flex justify-between items-start mb-2 opacity-60">
+                                <div class="flex items-center gap-1 cursor-help">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest">Sharpe</span>
+                                    <span class="material-symbols-outlined text-[10px] text-slate-500">help</span>
+                                </div>
+                            </div>
+                            <!-- Tooltip OUTSIDE opacity container -->
+                            <div
+                                class="absolute bottom-full left-0 mb-2 w-64 bg-black border border-slate-600 p-3 rounded-lg text-xs text-white hidden group-hover:block z-[100] shadow-2xl">
+                                <strong class="text-primary block mb-1">Sharpe Ratio</strong>
+                                Risk-adjusted return measure: (Return - Risk-Free Rate) / Volatility. A Sharpe > 1 is
+                                good, > 2 is excellent. It shows how much extra return you get for the additional
+                                volatility.
+                            </div>
+                            <div class="flex items-baseline gap-2 mb-2">
+                                <span class="text-xl font-mono text-white tracking-tight" id="val-shp-curr">-</span>
+                                <span class="text-[10px] text-slate-500 font-mono">Current</span>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-slate/30 pt-2">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] uppercase text-primary font-bold">Optimal</span>
+                                    <span class="text-sm font-mono text-white" id="val-shp-opt">-</span>
+                                </div>
+                                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded text-xs font-mono"
+                                    id="badge-shp">
+                                    <span id="val-shp-delta">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. SORTINO RATIO -->
+                        <div
+                            class="bg-gunmetal border border-slate rounded-xl p-4 shadow-lg group hover:border-slate/60 transition-all relative">
+                            <div class="flex justify-between items-start mb-2 opacity-60">
+                                <div class="flex items-center gap-1 cursor-help">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest">Sortino</span>
+                                    <span class="material-symbols-outlined text-[10px] text-slate-500">help</span>
+                                </div>
+                            </div>
+                            <!-- Tooltip OUTSIDE opacity container -->
+                            <div
+                                class="absolute bottom-full left-0 mb-2 w-64 bg-black border border-slate-600 p-3 rounded-lg text-xs text-white hidden group-hover:block z-[100] shadow-2xl">
+                                <strong class="text-primary block mb-1">Sortino Ratio</strong>
+                                Modified Sharpe that only considers downside deviation (negative returns). Formula:
+                                (Return - Target) / Downside Deviation. Higher is better.
+                            </div>
+                            <div class="flex items-baseline gap-2 mb-2">
+                                <span class="text-xl font-mono text-white tracking-tight" id="val-sor-curr">-</span>
+                                <span class="text-[10px] text-slate-500 font-mono">Current</span>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-slate/30 pt-2">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] uppercase text-primary font-bold">Optimal</span>
+                                    <span class="text-sm font-mono text-white" id="val-sor-opt">-</span>
+                                </div>
+                                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded text-xs font-mono"
+                                    id="badge-sor">
+                                    <span id="val-sor-delta">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. TAIL RISK (CVaR) -->
+                        <div
+                            class="bg-gunmetal border border-slate rounded-xl p-4 shadow-lg group hover:border-slate/60 transition-all relative">
+                            <div class="flex justify-between items-start mb-2 opacity-60">
+                                <div class="flex items-center gap-1 cursor-help">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest">CVaR (95%)</span>
+                                    <span class="material-symbols-outlined text-[10px] text-slate-500">help</span>
+                                </div>
+                            </div>
+                            <!-- Tooltip OUTSIDE opacity container -->
+                            <div
+                                class="absolute bottom-full left-0 mb-2 w-64 bg-black border border-slate-600 p-3 rounded-lg text-xs text-white hidden group-hover:block z-[100] shadow-2xl">
+                                <strong class="text-primary block mb-1">Conditional Value at Risk (CVaR 95%)</strong>
+                                Expected loss in the worst 5% of scenarios. If CVaR is -15%, you could lose 15% or more
+                                in extreme market conditions.
+                            </div>
+                            <div class="flex items-baseline gap-2 mb-2">
+                                <span class="text-xl font-mono text-white tracking-tight" id="val-cvar-curr">-</span>
+                                <span class="text-[10px] text-slate-500 font-mono">Current</span>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-slate/30 pt-2">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] uppercase text-primary font-bold">Optimal</span>
+                                    <span class="text-sm font-mono text-white" id="val-cvar-opt">-</span>
+                                </div>
+                                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded text-xs font-mono"
+                                    id="badge-cvar">
+                                    <span id="val-cvar-delta">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- 6. STRESS DRAWDOWN -->
+                        <div
+                            class="bg-gunmetal border border-slate rounded-xl p-4 shadow-lg group hover:border-slate/60 transition-all relative">
+                            <div class="flex justify-between items-start mb-2 opacity-60">
+                                <div class="flex items-center gap-1 cursor-help">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest">Stress DD</span>
+                                    <span class="material-symbols-outlined text-[10px] text-slate-500">help</span>
+                                </div>
+                            </div>
+                            <!-- Tooltip OUTSIDE opacity container -->
+                            <div
+                                class="absolute bottom-full left-0 mb-2 w-64 bg-black border border-slate-600 p-3 rounded-lg text-xs text-white hidden group-hover:block z-[100] shadow-2xl">
+                                <strong class="text-primary block mb-1">Stress Drawdown</strong>
+                                Estimated maximum portfolio loss during a high-correlation market crash scenario.
+                            </div>
+                            <div class="flex items-baseline gap-2 mb-2">
+                                <span class="text-xl font-mono text-white tracking-tight" id="val-dd-curr">-</span>
+                                <span class="text-[10px] text-slate-500 font-mono">Current</span>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-slate/30 pt-2">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] uppercase text-primary font-bold">Optimal</span>
+                                    <span class="text-sm font-mono text-white" id="val-dd-opt">-</span>
+                                </div>
+                                <div class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded text-xs font-mono"
+                                    id="badge-dd">
+                                    <span id="val-dd-delta">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- EFFICIENT FRONTIER (5/12) -->
+                <div class="col-span-12 xl:col-span-5 h-[280px] card-panel p-6 relative group">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xs font-bold uppercase tracking-widest text-white">Efficient Frontier</h3>
+                            <div class="info-tooltip">
+                                <span class="material-symbols-outlined info-icon">help</span>
+                                <div class="tooltip-content">
+                                    <div class="tooltip-title">Efficient Frontier</div>
+                                    <div class="tooltip-text">
+                                        <strong>Monte Carlo Simulation:</strong> Each dot represents one possible
+                                        portfolio from thousands of random weight combinations. The curve along the
+                                        top-left edge shows the best possible risk-return tradeoff. Portfolios on this
+                                        frontier offer the highest return for any given risk level. The optimal
+                                        portfolio (blue) maximizes your chosen objective.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="flex items-center gap-2">
+                                <span class="size-2 rounded-full bg-slate-500"></span>
+                                <span class="text-[9px] font-bold uppercase">Simulated</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="size-2 rounded-full bg-primary shadow-lg shadow-primary/50"></span>
+                                <span class="text-[9px] font-bold uppercase text-primary">Optimal</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full h-[200px]">
+                        <canvas id="frontierChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 2: ASSET ALLOCATION (ENLARGED) + SECTOR COMPOSITION -->
+            <div class="grid grid-cols-12 gap-8">
+                <!-- ASSET ALLOCATION (8/12 - 30% larger) -->
+                <div class="col-span-12 xl:col-span-8 card-panel p-6 flex flex-col h-[400px]">
+                    <div class="flex items-center gap-2 mb-4">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-white">Asset Allocation</h3>
+                        <div class="info-tooltip">
+                            <span class="material-symbols-outlined info-icon">help</span>
+                            <div class="tooltip-content">
+                                <div class="tooltip-title">Asset Allocation</div>
+                                <div class="tooltip-text">
+                                    <strong>Portfolio Weights:</strong> Compares your current holdings (left) vs the
+                                    mathematically optimal allocation (right). Each slice represents a stock's
+                                    percentage of total portfolio value. The optimal weights are calculated to maximize
+                                    risk-adjusted returns based on your selected preferences.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- DUAL PIES FOR STOCK - ENLARGED -->
+                    <div class="grid grid-cols-2 gap-6 mb-4 shrink-0">
+                        <div class="flex flex-col items-center relative">
+                            <div class="h-40 w-40 relative">
+                                <canvas id="pieStockUser"></canvas>
+                            </div>
+                            <span class="text-[10px] uppercase text-slate-500 font-bold mt-2">Current</span>
+                        </div>
+                        <div class="flex flex-col items-center relative">
+                            <div class="h-40 w-40 relative">
+                                <canvas id="pieStockOpt"></canvas>
+                            </div>
+                            <span class="text-[10px] uppercase text-primary font-bold mt-2">Optimal</span>
+                        </div>
+                    </div>
+
+                    <!-- COMPACT TABLE - 4 visible rows -->
+                    <div class="flex-1 overflow-y-auto pr-2 custom-scroll max-h-[120px]">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-[9px] text-slate-500 uppercase border-b border-white/5">
+                                    <th class="pb-2 font-bold">Asset</th>
+                                    <th class="pb-2 font-bold text-right">Curr</th>
+                                    <th class="pb-2 font-bold text-right text-primary">Opt</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-table-body" class="font-mono text-[10px]">
+                                <!-- Tickers injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SECTOR COMPOSITION (4/12) -->
+                <div class="col-span-12 xl:col-span-4 card-panel p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-white">Sector Composition</h3>
+                        <div class="info-tooltip">
+                            <span class="material-symbols-outlined info-icon">help</span>
+                            <div class="tooltip-content">
+                                <div class="tooltip-title">Sector Composition</div>
+                                <div class="tooltip-text">
+                                    <strong>Sector Diversification:</strong> Shows how your portfolio is distributed
+                                    across market sectors (Technology, Healthcare, etc.). Comparing current vs optimal
+                                    helps identify over/under-weighted sectors. Proper sector diversification reduces
+                                    industry-specific risks.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center gap-6 py-4">
+                        <div class="flex flex-col items-center w-full">
+                            <div class="h-32 w-full relative max-w-[180px]">
+                                <canvas id="pieSectorUser"></canvas>
+                            </div>
+                            <span class="text-[10px] uppercase text-slate-500 font-bold mt-2">Current</span>
+                        </div>
+                        <div class="w-full h-px bg-white/5"></div>
+                        <div class="flex flex-col items-center w-full">
+                            <div class="h-32 w-full relative max-w-[180px]">
+                                <canvas id="pieSectorOpt"></canvas>
+                            </div>
+                            <span class="text-[10px] uppercase text-primary font-bold mt-2">Optimal</span>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div id="sectorTab" class="tab-content hidden">
-                    <div class="chart-box full">
-                        <div id="sectorChart"></div>
+            <!-- ROW 3: STRATEGY DETAILS (3x2 with Bar Graphs) -->
+            <div class="card-panel p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center gap-2">
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-widest text-white">Strategy Details</h3>
+                            <p class="text-[10px] text-slate-500 mt-1">Actionable shifts by primary industry.</p>
+                        </div>
+                        <div class="info-tooltip">
+                            <span class="material-symbols-outlined info-icon">help</span>
+                            <div class="tooltip-content">
+                                <div class="tooltip-title">Strategy Details</div>
+                                <div class="tooltip-text">
+                                    <strong>Sector Rebalancing:</strong> Shows recommended changes for each sector. The
+                                    bars compare your current allocation (gray) vs optimal (blue). Positive deltas
+                                    suggest increasing exposure, negative deltas suggest reducing. Use this to guide
+                                    your rebalancing trades.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex items-center gap-2"><span class="size-2 rounded bg-slate-700"></span><span
+                                class="text-[9px] font-bold uppercase">Current</span></div>
+                        <div class="flex items-center gap-2"><span class="size-2 rounded bg-primary"></span><span
+                                class="text-[9px] font-bold uppercase text-primary">Optimal</span></div>
+                    </div>
+                </div>
+                <div id="sector-gauges" class="grid grid-cols-3 gap-4">
+                    <!-- DYNAMIC CARDS WITH BAR GRAPHS -->
+                </div>
+            </div>
+
+            <!-- ROW 4: SECTOR VOLATILITY & ROLLING VOLATILITY -->
+            <div class="grid grid-cols-12 gap-8">
+                <!-- SECTOR VOLATILITY CONTRIBUTION (40% = 5/12) -->
+                <div class="col-span-12 xl:col-span-5 card-panel p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center gap-2">
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-widest text-white">Sector Contribution
+                                    to Volatility</h3>
+                                <p class="text-[10px] text-slate-500 mt-1">Percent of total portfolio risk contributed
+                                    by each sector.</p>
+                            </div>
+                            <div class="info-tooltip">
+                                <span class="material-symbols-outlined info-icon">help</span>
+                                <div class="tooltip-content">
+                                    <div class="tooltip-title">Risk Decomposition</div>
+                                    <div class="tooltip-text">
+                                        <strong>Marginal Risk Contribution:</strong> Shows how much each sector
+                                        contributes to total portfolio volatility, not just by weight but by covariance
+                                        with other assets. A sector with 20% weight might contribute 40% of risk if
+                                        highly correlated. Use this to identify concentrated risk.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full h-[350px]">
+                        <canvas id="volatilityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- ROLLING VOLATILITY COMPARISON (60% = 7/12) -->
+                <div class="col-span-12 xl:col-span-7 card-panel p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center gap-2">
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-widest text-white">Rolling Volatility
+                                    Comparison</h3>
+                                <p class="text-[10px] text-slate-500 mt-1">30-day rolling volatility: User portfolio vs
+                                    Optimal portfolio.</p>
+                            </div>
+                            <div class="info-tooltip tooltip-left">
+                                <span class="material-symbols-outlined info-icon">help</span>
+                                <div class="tooltip-content">
+                                    <div class="tooltip-title">Rolling Volatility</div>
+                                    <div class="tooltip-text">
+                                        <strong>Historical Risk Comparison:</strong> Shows how portfolio volatility has
+                                        changed over time using a 30-day rolling window. Lower values mean more stable
+                                        returns. Compare your portfolio (blue) vs the optimal (green) to see if
+                                        optimization would have reduced historical risk during market turbulence.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 text-[10px]">
+                            <span class="flex items-center gap-1"><span class="w-3 h-1 bg-blue-400 rounded"></span>
+                                User</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-1 bg-emerald-400 rounded"></span>
+                                Optimal</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-[350px]">
+                        <canvas id="rollingVolatilityChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <hr>
 
-            <!-- AI Insights -->
-            <div class="ai-section">
-                <button id="askAiBtn" class="secondary-btn">✨ Ask AI Specialist</button>
-                <div id="aiResponse" class="ai-content hidden"></div>
+
+
+            <!-- ROW 4: TACTICAL SECTOR ROTATION (GEN AI) -->
+            <div
+                class="bg-gunmetal border border-slate rounded-2xl p-10 flex flex-col xl:flex-row gap-12 shadow-2xl items-center">
+                <div class="xl:w-1/3">
+                    <h2 class="text-2xl font-bold text-white mb-4 flex items-center gap-3">
+                        <span class="material-symbols-outlined text-accent text-3xl">auto_mode</span>
+                        Tactical Rotation
+                    </h2>
+                    <p class="text-sm text-slate-400 leading-relaxed mb-6">
+                        Deep analysis of your current vs optimal sector weightings. Our AI evaluates macroeconomic
+                        factors to suggest strategic repositioning for maximum efficiency.
+                    </p>
+                    <div class="flex items-center gap-3 bg-charcoal/50 p-3 rounded-lg border border-white/5 w-fit">
+                        <span class="text-[10px] font-mono text-slate-500 uppercase">Engine: Gemma 3</span>
+                    </div>
+                </div>
+
+                <div class="xl:w-2/3 w-full flex flex-col gap-6">
+                    <div id="sector-analysis-result"
+                        class="bg-charcoal/40 rounded-xl p-8 border border-white/5 text-sm leading-relaxed text-slate-300 min-h-[220px] max-h-[350px] overflow-y-auto custom-scroll markdown-body">
+
+                        <div class="flex flex-col items-center justify-center h-48 text-center opacity-40">
+                            <span class="material-symbols-outlined text-4xl mb-4">insights</span>
+                            <p class="italic">Ready for tactical assessment.</p>
+                        </div>
+                    </div>
+
+                    <button id="btn-analyze-sector"
+                        class="bg-primary hover:scale-[1.02] active:scale-[0.98] text-white font-bold py-4 px-10 rounded-xl shadow-xl shadow-primary/20 transition-all flex items-center justify-center gap-3 text-sm">
+                        <span class="material-symbols-outlined">bolt</span>
+                        GENERATE ROTATION ANALYSIS
+                    </button>
+                </div>
             </div>
 
-        </section>
+            <!-- ROW 5: TITANIUM AI REPORT (GEMINI) -->
+            <div id="ai-report-section"
+                class="bg-gunmetal border border-slate rounded-2xl p-10 min-h-[500px] relative hidden shadow-2xl">
+                <div class="flex justify-between items-start mb-10 border-b border-white/10 pb-8">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary text-3xl">psychology</span>
+                            Titanium Risk Intelligence Report
+                        </h2>
+                        <p class="text-sm text-slate-500 font-mono">Expert synthesis via Gemini 2.5 Flash</p>
+                    </div>
+                    <button id="btn-download-pdf" disabled
+                        class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-lg active:scale-95 disabled:opacity-50">
+                        <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+                        DOWNLOAD PDF
+                    </button>
+                </div>
+
+                <div id="ai-full-content" class="markdown-body">
+                    <div class="flex flex-col items-center justify-center py-24 space-y-6">
+                        <div class="spinner"></div>
+                        <p class="text-sm text-slate-500 animate-pulse tracking-wide uppercase font-bold">Synthesizing
+                            Comprehensive Portfolio Audit Data...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </main>
 
+    <!-- FLOATING AI FAB -->
+    <button id="fab-ai"
+        class="fixed bottom-10 right-10 size-16 bg-primary hover:bg-blue-600 text-white rounded-full shadow-2xl shadow-primary/40 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-50 group border-4 border-white/10 hidden">
+        <span class="material-symbols-outlined text-3xl group-hover:animate-pulse">auto_awesome</span>
+        <div
+            class="absolute right-full mr-6 bg-gunmetal border border-slate px-4 py-2 rounded-xl text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-2xl">
+            Generate Comprehensive Analysis Report
+        </div>
+    </button>
+
+    <!-- MAIN LOGIC -->
     <script src="/static/app.js"></script>
 </body>
 
