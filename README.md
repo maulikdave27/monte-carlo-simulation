@@ -37,9 +37,12 @@ What sets **Portfolio Risk Intelligence** apart from conventional financial tool
 - **Data-Driven Insights**: AI insights are enriched with actual portfolio metrics, sector risk contributions, and ticker-level data.
 
 ### 📊 Advanced Risk Analytics
+- **2026 Market Calibration**: Integrated forward-looking model using 4.2% Risk-Free Rates and 9.7% Market Return expectations anchored to Jan 2026 benchmarks.
+- **Shrinkage Estimators**: Implementation of Numba-accelerated Shrinkage Intensity to reduce estimation error by pulling historical means toward market-wide expectations.
+- **Risk-Specific Haircuts**: Multi-tier haircut matrix (ranging from 3 to 15 bps) adjusted for time horizons and investor risk mandates.
 - **Sector Rotation**: High-conviction advice on rebalancing across 11+ industry sectors.
-- **Risk Decomposition**: Visualize which sectors contribute most to your portfolio's total volatility.
-- **Rolling Volatility**: 30-day rolling window comparison between current and optimal portfolios.
+- **Risk Decomposition**: Visualize which sectors contribute most to your portfolio's total volatility (Marginal Risk Contribution).
+- **Rolling Volatility**: 30-day rolling window comparison specifically calibrated for 2026 market regime shifts.
 - **Stress Modeling**: "Black Swan" stress testing (Conditional Value at Risk - CVaR) and historical drawdown analysis.
 
 ---

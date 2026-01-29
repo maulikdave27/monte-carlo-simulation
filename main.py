@@ -58,6 +58,7 @@ class InsightRequest(BaseModel):
     optimal_metrics: Dict
     simulation_data: Dict
     tickers: List[str]
+    total_simulations: Optional[int] = None
 
 # --- API Endpoints ---
 
@@ -271,7 +272,8 @@ async def get_ai_insights(request: InsightRequest):
             request.user_metrics,
             request.optimal_metrics,
             request.simulation_data,
-            request.tickers
+            request.tickers,
+            total_simulations=request.total_simulations
         )
         return {"markdown": markdown}
     except Exception as e:

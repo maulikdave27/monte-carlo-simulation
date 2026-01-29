@@ -18,7 +18,7 @@ def get_genai_client():
     except Exception as e:
         return None, f"⚠️ Error configuring Gemini Client: {str(e)}"
 
-def generate_full_report(user_metrics, optimal_metrics, simulation_data, tickers):
+def generate_full_report(user_metrics, optimal_metrics, simulation_data, tickers, total_simulations=None):
     """
     Generates text insights using Gemini based on portfolio simulation data.
     
@@ -27,6 +27,7 @@ def generate_full_report(user_metrics, optimal_metrics, simulation_data, tickers
         optimal_metrics (dict): {'return': float, 'volatility': float, 'sharpe': float, 'sortino': float, 'cvar': float, 'diversification_score': float, 'weights': list}
         simulation_data (dict): {'returns': list, 'volatility': list, 'sharpe': list} - Raw sim data
         tickers (list): List of asset ticker symbols
+        total_simulations (int, optional): The actual total number of iterations run (before sampling)
         
     Returns:
         str: MARKDOWN formatted insights from Gemini.
@@ -60,11 +61,13 @@ def generate_full_report(user_metrics, optimal_metrics, simulation_data, tickers
     user_sortino_pct = (np.array(simulation_data['sortino']) < user_metrics['sortino']).mean() * 100 if 'sortino' in simulation_data else 0
     
     # 3. Construct the Prompt
+    display_count = total_simulations if total_simulations else stats['count']
+    
     prompt = f"""
     You are an elite institutional Portfolio Strategist at a top-tier asset management firm.
     
     **Context:**
-    We ran a Monte Carlo simulation with {stats['count']:,} iterations to find the optimal risk-adjusted portfolio.
+    We ran a Monte Carlo simulation with {display_count:,} iterations to find the optimal risk-adjusted portfolio.
     
     **Asset Universe:**
     {', '.join(tickers)}
@@ -119,7 +122,7 @@ def generate_full_report(user_metrics, optimal_metrics, simulation_data, tickers
     - Volatility profile
     
     ### Simulation Context
-    Explain where the portfolio ranks among {stats['count']:,} simulated portfolios.
+    Explain where the portfolio ranks among {display_count:,} simulated portfolios.
     Discuss the statistical significance of the optimization.
     
     ---

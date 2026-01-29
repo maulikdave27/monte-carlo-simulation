@@ -154,6 +154,7 @@ ui.fabAi.addEventListener('click', async () => {
     ui.aiFullContent.innerHTML = '<div class="flex flex-col items-center justify-center p-12"><div class="spinner mb-4"></div><p class="text-xs text-slate-500">Generating AI Summary Report...</p></div>';
 
     try {
+        const sims = parseInt(document.querySelector('input[name="sims"]:checked').value);
         const res = await fetch('/api/insights', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -161,7 +162,8 @@ ui.fabAi.addEventListener('click', async () => {
                 user_metrics: appState.results.user,
                 optimal_metrics: appState.results.optimal,
                 simulation_data: appState.results.summary_data,
-                tickers: appState.results.tickers
+                tickers: appState.results.tickers,
+                total_simulations: sims
             })
         });
         const data = await res.json();
