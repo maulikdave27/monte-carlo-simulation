@@ -1,4 +1,4 @@
-# 🚀 Portfolio Risk Intelligence v5.0 (Ultra Performance)
+#  Portfolio Risk Intelligence v2.4
 
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![AI-Powered](https://img.shields.io/badge/AI-Gemma%203-blueviolet)](https://ollama.com/library/gemma3)
@@ -8,7 +8,7 @@
 
 ---
 
-## 🌟 Project Novelty & Innovation
+##  Project Novelty & Innovation
 
 What sets **Portfolio Risk Intelligence** apart from conventional financial tools is its unique blend of extreme performance and high-context AI integration:
 
@@ -19,9 +19,9 @@ What sets **Portfolio Risk Intelligence** apart from conventional financial tool
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
-### ⚡ Ultra-Performance Engine
+###  Ultra-Performance Engine
 - **Numba JIT Acceleration**: Core mathematical kernels are compiled to machine code for extreme speed.
 - **Massive Scale**: Run up to **4,000,000 Monte Carlo iterations** in under 3 seconds.
 - **Vectorized Math**: Optimized NumPy-based computation for covariance, volatility, and Sharpe ratio analysis.
@@ -34,17 +34,17 @@ What sets **Portfolio Risk Intelligence** apart from conventional financial tool
 | **Numba JIT** (Sequential)           | ~5.50s         | ~10x Faster        | Minimal (C-level structs) |
 | **Numba JIT** (Parallel + FastMath)  | **~1.78s**     | **~31x Faster**    | Minimal + Scales across Cores |
 
-### 💻 Modern Web Architecture
+###  Modern Web Architecture
 - **FastAPI Core**: A high-performance REST API handling financial modeling and simulation.
 - **Premium UI/UX**: Dark-themed, professional interface with glassmorphism effects and responsive design.
 - **Real-Time Visuals**: Interactive Chart.js and Plotly.js visualizations for efficient frontiers, rolling volatility, and sector risk contributions.
 
-### 🤖 Dual-AI Intelligence
+###  Dual-AI Intelligence
 - **Global Strategist (Gemini 1.5 Flash)**: Generates comprehensive portfolio audit reports and long-term investment summaries.
 - **Local Specialist (Gemma 3)**: Provides real-time, privacy-focused **Sector Rotation Analysis** based on live simulation data.
 - **Data-Driven Insights**: AI insights are enriched with actual portfolio metrics, sector risk contributions, and ticker-level data.
 
-### 📊 Advanced Risk Analytics
+###  Advanced Risk Analytics
 - **2026 Market Calibration**: Integrated forward-looking model using 4.2% Risk-Free Rates and 9.7% Market Return expectations anchored to Jan 2026 benchmarks.
 - **Shrinkage Estimators**: Implementation of Numba-accelerated Shrinkage Intensity to reduce estimation error by pulling historical means toward market-wide expectations.
 - **Risk-Specific Haircuts**: Multi-tier haircut matrix (ranging from 3 to 15 bps) adjusted for time horizons and investor risk mandates.
@@ -55,7 +55,7 @@ What sets **Portfolio Risk Intelligence** apart from conventional financial tool
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 - **Backend**: FastAPI, Uvicorn, Python 3.10+
 - **Frontend**: Vanilla HTML5, CSS3 (Tailwind CSS utilities), ES6+ JavaScript
@@ -68,7 +68,7 @@ What sets **Portfolio Risk Intelligence** apart from conventional financial tool
 
 ---
 
-## ⚙️ Project Setup
+##  Project Setup
 
 Follow these steps to set up the Portfolio Risk Intelligence engine on your local machine.
 
@@ -80,12 +80,8 @@ Follow these steps to set up the Portfolio Risk Intelligence engine on your loca
 ### 2. Repository Installation
 ```bash
 # Clone the project
-git clone <your-repository-url>
-cd "code 1.2"
-
-# Create a virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+git clone <https://github.com/maulikdave27/monte-carlo-simulation>
+cd "monte-carlo-simulation-main"
 
 # Install high-performance dependencies
 pip install -r requirements.txt
@@ -134,5 +130,5 @@ After the server starts, navigate to:
 
 ---
 
-**Developed for the Major Project 2025.**
+
 *Disclaimer: This tool is for educational purposes only. Financial calculations are projections based on historical data and do not constitute financial advice.*
