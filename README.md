@@ -12,7 +12,7 @@
 
 What sets **Portfolio Risk Intelligence** apart from conventional financial tools is its unique blend of extreme performance and high-context AI integration:
 
-1.  **Hybrid AI Strategy**: Unlike standard wrappers, this project utilizes a **dual-brain architecture**. It offloads sensitive, real-time sector analysis to a **local Gemma 3 model** via Ollama for privacy and speed, while using **Gemini 1.5 Flash** for high-level institutional reporting.
+1.  **Hybrid AI Strategy**: Unlike standard wrappers, this project utilizes a **dual-brain architecture**. It offloads sensitive, real-time sector analysis to a **local Gemma 3 model** via Ollama for privacy and speed, while using **Gemini 2.5 Flash** for high-level institutional reporting.
 2.  **JIT-Accelerated Financial Kernels**: Traditionally, Python is considered "slow" for heavy simulations. We overcome this by using **Numba JIT compilation**, translating Python math into machine-level instructions. This allows us to process **4 million iterations** in seconds—performance typically reserved for C++ or Fortran applications.
 3.  **Data-Enriched Intelligence**: Most AI financial advisors provide "hallucinated" or generic advice. Our engine injects **vectorized simulation results** and **sector-specific risk contributions** directly into the AI's context, forcing the LLM to provide quantitatively grounded, high-conviction advice.
 4.  **Beyond MPT**: While standard tools focus purely on Sharpe Ratios, we integrate **Conditional Value at Risk (CVaR)** and **30-day Rolling Volatility windows** to capture "fat-tail" risks and market regime shifts that traditional Modern Portfolio Theory often ignores.
