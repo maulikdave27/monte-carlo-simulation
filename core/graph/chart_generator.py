@@ -84,7 +84,7 @@ def plot_efficient_frontier(sim_data, user_metrics, opt_metrics):
         x=[user_metrics['volatility']],
         y=[user_metrics['return']],
         mode='markers+text',
-        marker=dict(color='red', size=15, symbol='x'),
+        marker=dict(color='red', size=16, symbol='circle', line=dict(color='black', width=2)),
         text=['YOU'], textposition="top center",
         name='Your Portfolio'
     ))
@@ -94,7 +94,7 @@ def plot_efficient_frontier(sim_data, user_metrics, opt_metrics):
         x=[opt_metrics['volatility']],
         y=[opt_metrics['return']],
         mode='markers+text',
-        marker=dict(color='green', size=15, symbol='star'),
+        marker=dict(color='green', size=18, symbol='star', line=dict(color='black', width=2)),
         text=['OPTIMAL'], textposition="top center",
         name='AI Optimized'
     ))

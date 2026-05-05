@@ -28,9 +28,9 @@
         "UNH"
     ],
     "start_date": "2012-05-31",
-    "end_date": "2026-01-26",
+    "end_date": "2026-05-03",
     "num_assets": 26,
     "data_source": "Yahoo Finance (yfinance)",
     "price_type": "Adjusted Close",
-    "generated_on": "2026-01-26T14:18:31.081763"
+    "generated_on": "2026-05-03T20:47:32.034148"
 }

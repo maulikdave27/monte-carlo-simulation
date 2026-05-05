@@ -188,18 +188,44 @@ def run_audit_endpoint(request: AuditRequest):
         opt_rolling_vol = opt_portfolio_returns.rolling(window=rolling_window).std() * np.sqrt(252) * 100
         
         # Get dates and drop NaN values
-        valid_idx = user_rolling_vol.dropna().index
+        user_rolling_vol = user_rolling_vol.dropna()
+        opt_rolling_vol = opt_rolling_vol.dropna()
+        
+        # Hedge fund inspired dynamism: Match historical lookback to the investment horizon.
+        # Short horizons need recent regime data; long horizons need multiple market cycles.
+        lookback_map = {
+            "1-3 years": 252 * 2,  # 2 years: captures current market regime
+            "3-6 years": 252 * 5,  # 5 years: captures a typical business cycle
+            "6+ years": 252 * 10   # 10 years: captures secular trends and macro shifts
+        }
+        recent_days = lookback_map.get(request.time_horizon, 252 * 3)
+        
+        if len(user_rolling_vol) > recent_days:
+            user_rolling_vol = user_rolling_vol.iloc[-recent_days:]
+            opt_rolling_vol = opt_rolling_vol.iloc[-recent_days:]
+
+        valid_idx = user_rolling_vol.index
         dates = [d.strftime('%Y-%m-%d') for d in valid_idx]
-        user_vol_values = user_rolling_vol.dropna().values.tolist()
-        opt_vol_values = opt_rolling_vol.dropna().values.tolist()
+        user_vol_values = user_rolling_vol.values.tolist()
+        opt_vol_values = opt_rolling_vol.values.tolist()
         
         # Sample data points if too many (keep ~100 points for smooth chart)
         max_points = 100
         if len(dates) > max_points:
             step = len(dates) // max_points
-            dates = dates[::step]
-            user_vol_values = user_vol_values[::step]
-            opt_vol_values = opt_vol_values[::step]
+            sampled_dates = dates[::step]
+            sampled_user = user_vol_values[::step]
+            sampled_opt = opt_vol_values[::step]
+            
+            # Ensure the very last date is always included
+            if sampled_dates[-1] != dates[-1]:
+                sampled_dates.append(dates[-1])
+                sampled_user.append(user_vol_values[-1])
+                sampled_opt.append(opt_vol_values[-1])
+                
+            dates = sampled_dates
+            user_vol_values = sampled_user
+            opt_vol_values = sampled_opt
         
         rolling_vol_data = {
             "dates": dates,

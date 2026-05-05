@@ -421,7 +421,8 @@ function renderRollingVolatility(rollingData) {
                         color: '#8E9AAF',
                         font: { family: 'Roboto Mono', size: 9 },
                         maxRotation: 45,
-                        maxTicksLimit: 8
+                        maxTicksLimit: 8,
+                        includeBounds: true
                     }
                 },
                 y: {
@@ -547,7 +548,7 @@ function initChart() {
     Chart.defaults.font.family = 'Roboto Mono';
     appState.chartInstance = new Chart(ctx, {
         type: 'scatter',
-        data: { datasets: [{ label: 'Simulation', data: [], backgroundColor: '#2A2E35', pointRadius: 1 }, { label: 'Current', data: [], backgroundColor: '#EF476F', pointRadius: 6 }, { label: 'Optimal', data: [], backgroundColor: '#3A86FF', pointRadius: 8 }] },
+        data: { datasets: [{ label: 'Simulation', data: [], backgroundColor: '#2A2E35', pointRadius: 1, order: 3 }, { label: 'Current', data: [], backgroundColor: '#EF476F', pointRadius: 7, order: 0, pointBorderColor: '#fff', pointBorderWidth: 2 }, { label: 'Optimal', data: [], backgroundColor: '#3A86FF', pointRadius: 9, order: 1, pointBorderColor: '#fff', pointBorderWidth: 2 }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'Volatility (Risk)' }, grid: { color: '#2A2E35' } }, y: { title: { display: true, text: 'Return' }, grid: { color: '#2A2E35' } } }, plugins: { legend: { display: false } } }
     });
 }
